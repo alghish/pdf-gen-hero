@@ -1,0 +1,185 @@
+<div class="container mt-5">
+  <h1 class="text-center">
+    <i class="fas fa-file-pdf"></i> Dynamic PDF Editor
+  </h1>
+  <ul class="nav nav-tabs mt-4" id="pdfTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active"
+        id="upload-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#upload"
+        type="button"
+        role="tab"
+      >
+        Upload PDF
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="select-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#select"
+        type="button"
+        role="tab"
+      >
+        Select Coordinates
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="generate-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#generate"
+        type="button"
+        role="tab"
+      >
+        Generate PDF
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content mt-3" id="pdfTabContent">
+    <!-- Upload Tab -->
+    <div class="tab-pane fade show active" id="upload" role="tabpanel">
+      <div class="mb-3">
+        <label for="uploadPdf" class="form-label">Upload PDF File</label>
+        <input
+          type="file"
+          id="uploadPdf"
+          class="form-control"
+          (change)="onFileChange($event)"
+        />
+      </div>
+      <button class="btn btn-primary" (click)="loadPdf()">
+        <i class="fas fa-upload"></i> Load PDF
+      </button>
+    </div>
+
+    <!-- Select Coordinates Tab -->
+    <div class="tab-pane fade" id="select" role="tabpanel">
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="nameInput" class="form-label">Name</label>
+            <input
+              type="text"
+              id="nameInput"
+              class="form-control"
+              [(ngModel)]="values['name']"
+              placeholder="Enter name"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="dateInput" class="form-label">Date</label>
+            <input
+              type="date"
+              id="dateInput"
+              class="form-control"
+              [(ngModel)]="values['date']"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="tableInput" class="form-label"
+              >Table Data (Comma-Separated)</label
+            >
+            <textarea
+              id="tableInput"
+              class="form-control"
+              [(ngModel)]="values['table']"
+              placeholder="Enter table data, separated by commas"
+            ></textarea>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <p>Select the element you want to place on the PDF:</p>
+          <div class="mb-3">
+            <select class="form-select" [(ngModel)]="selectedElement">
+              <option *ngFor="let element of elements" [value]="element">
+                {{ element }}
+              </option>
+            </select>
+          </div>
+          <p>
+            Click on the PDF below to select coordinates for
+            <strong>{{ selectedElement }}</strong
+            >:
+          </p>
+          <canvas id="pdfCanvas" (click)="onCanvasClick($event)"></canvas>
+          <div id="info" class="mt-3">{{ infoMessage }}</div>
+        </div>
+      </div>
+
+      <!-- Table for Coordinates -->
+      <h5 class="mt-4">Selected Locations</h5>
+      <table class="table table-bordered mt-3">
+        <thead>
+          <tr>
+            <th>Element</th>
+            <th>X Coordinate</th>
+            <th>Y Coordinate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let element of elements">
+            <td>{{ element }}</td>
+            <td>{{ coordinates[element]?.x?.toFixed(2) || "Not Selected" }}</td>
+            <td>{{ coordinates[element]?.y?.toFixed(2) || "Not Selected" }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Generate PDF Tab -->
+    <div class="tab-pane fade" id="generate" role="tabpanel">
+      <!-- s -->
+      <div class="container mt-5">
+        <div class="mt-4">
+          <h5>Selected Coordinates</h5>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>Value</th>
+                <th>X Coordinate</th>
+                <th>Y Coordinate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let element of elements">
+                <td>{{ element }}</td>
+                <td>{{ values[element.toLowerCase()] || "Not Assigned" }}</td>
+                <td>
+                  {{ coordinates[element]?.x?.toFixed(2) || "Not Selected" }}
+                </td>
+                <td>
+                  {{ coordinates[element]?.y?.toFixed(2) || "Not Selected" }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- e -->
+      <p>Click the button below to generate the modified PDF:</p>
+      <button
+        class="btn btn-success"
+        [disabled]="!isReadyToGenerate()"
+        (click)="generatePdf()"
+      >
+        <i class="fas fa-file-pdf"></i> Generate PDF
+      </button>
+      @if (downloadLink) {
+      <!-- <a id="downloadLink" class="btn btn-link" *ngIf="downloadLink" [href]="downloadLink" download="ModifiedPDF.pdf">Download Modified PDF</a> -->
+      <a
+        id="downloadLink"
+        class="btn btn-link"
+        [href]="downloadLink"
+        download="ModifiedPDF.pdf"
+        >Download Modified PDF</a
+      >
+      }
+    </div>
+  </div>
+</div>
